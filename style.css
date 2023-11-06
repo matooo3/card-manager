@@ -1,0 +1,27 @@
+body {
+    background-color: #333;
+    color: white;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+.list-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+ul {
+    list-style: none;
+}
+
+li {
+    border-style: groove;
+}
+
+
+
+.new-card-button {
+    align-items: end;
+}
