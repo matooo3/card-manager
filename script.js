@@ -1,5 +1,7 @@
 // global variable, to tell if addNewSection is allowed or if it is avtive already.
 active = false;
+localStorage.clear(); // #TODO FIX initial clear
+
 
 function addNewSection() {
     if (active) {
@@ -51,6 +53,7 @@ function addInputSectionId(sectionDiv) {
 function addInputImage(sectionDiv) {
     // Create Input for the sectionId
     const imageInput = document.createElement("input");
+    imageInput.id = "imageInput";
     imageInput.type = "file";
     imageInput.accept = "image/*"; // support all img-formats
     sectionDiv.appendChild(imageInput);
@@ -68,41 +71,72 @@ function addSaveButton(sectionDiv) {
 
 function saveSection(sectionDiv) {
     active = false; // done => allow addNewSection
-    
+    // sectionDiv.innerHTML = ''; //clear
     saveSectionName(sectionDiv);
     saveSectionImages(sectionDiv);
 
     deleteInputSectionId(sectionDiv);
+    deleteSaveButton(sectionDiv);
+
+    loadSectionNameFromLS(sectionDiv);
+    loadSectionImagesFromLS(sectionDiv);
+    scaleImg(sectionDiv);
+    
 }
 
 function saveSectionName(sectionDiv) {
     const sectionDivInput = sectionDiv.querySelector('input[type="text"]'); // take text input
     sectionDiv.id = sectionDivInput.value; // take user input
-    sectionDiv.innerHTML = sectionDiv.id; // Change name of section to sectionId
+    localStorage.setItem("name:"+sectionDiv.id, sectionDiv.id);
+    // sectionDiv.innerHTML = sectionDiv.id; // Change name of section to sectionId
 }
 
 function saveSectionImages(sectionDiv) {
     const sectionDivInput = sectionDiv.querySelector('input[type="file"]')
+    const imageInput = document.getElementById("imageInput");
     // Check if a file is selected:
-    if(sectionDivInput.files.length > 0){
-        const file = sectionDivInput.files[0];
-
-        //Check if the file is an image:
+    if(imageInput == null) {
+        return;
+    }
+    if(imageInput.files.length > 0){ // check if input empty
+        const file = imageInput.files[0];
+        // Check if the file is an image:
         if(file.type.startsWith('image/')) {
-            // 1. Create img-Element !
-            const img = document.createElement('img');
-            const imgContainer = document.createElement('div');
-            // 2. Create URL link ! (with objectURL)
-            img.src = URL.createObjectURL(file); 
-            // 3. Put the img in the Div !
-            imgContainer.appendChild(img);
-            sectionDiv.appendChild(imgContainer);
+
+            // // 1.Create URL link ! (with Data-URL)
+            // const reader = new FileReader();
+
+            // reader.onload = function(e) { // asynchron => erst wenn Read is done
+            //     const imgSrc = e.target.result;
+            //     // URL to storage
+            //     localStorage.setItem("src:"+sectionDiv.id, imgSrc);
+            // }
+            // reader.readAsDataURL(file);
+            const imgSrc = URL.createObjectURL(file);
+            localStorage.setItem("src:"+sectionDiv.id, imgSrc);    
+            
+
         } else {
             console.error("Selected file is not an image.")
         }
     } else {
         console.warn("No file selected.")
     }
+}
+
+function loadSectionNameFromLS(sectionDiv) {
+    let name = localStorage.getItem("name:"+sectionDiv.id);
+    nameDiv = document.createElement("div");
+    nameDiv.innerHTML = name;
+    sectionDiv.appendChild(nameDiv);
+}
+
+function loadSectionImagesFromLS(sectionDiv) {
+    imgSrc = localStorage.getItem("src:"+sectionDiv.id);
+    img = document.createElement("img");
+    img.src = imgSrc;
+    img.id = "img:"+sectionDiv.id;
+    sectionDiv.appendChild(img);
 }
 
 // function deleteSectionId(sectionDiv) {
@@ -124,3 +158,14 @@ function deleteInputSectionId(sectionDiv) {
     });
 }
 
+function deleteSaveButton(sectionDiv) {
+    const saveButton = document.getElementById("saveButton");
+    if(saveButton) {
+        saveButton.remove();
+    }
+}
+
+function scaleImg(sectionDiv) {
+    const img = document.getElementById("img:"+sectionDiv.id);
+    img.width = 256;
+}
